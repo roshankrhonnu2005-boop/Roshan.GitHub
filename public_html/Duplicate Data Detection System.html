@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Duplicate Data Detection System</title>
+        <style>
+            *{
+                margin:0;
+                padding:0;
+                box-sizing:border-box;
+                font-family:Arial,sans-serif;
+            }
+            body{
+                background:#f4f7fc;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                min-height:100vh;
+                padding:20px;
+            }
+            .container{
+                width:900px;
+                background:#fff;
+                padding:30px;
+                border-radius:15px;
+                box-shadow:0 10px 25px rgba(0,0,0,0.1);
+            }
+            h1{
+                text-align:center;
+                margin-bottom:20px;
+                color:#333;
+            }
+            .input-group{
+                display:grid;
+                grid-template-columns:1fr 1fr 1fr auto;
+                gap:10px;
+                margin-bottom:20px;
+            }
+            input{
+                padding:12px;
+                border:1px solid #ccc;
+                border-radius:8px;
+                outline:none;
+            }
+            button{
+                padding:12px 20px;
+                border:none;
+                background:#2563eb;
+                color:#fff;
+                border-radius:8px;
+                cursor:pointer;
+            }
+            button:hover{
+                background:#1d4ed8;
+            }
+            .search-box{
+                margin-bottom:20px;
+            }
+            table{
+                width:100%;
+                border-collapse:collapse;
+            }
+            th,td{
+                padding:12px;
+                border:1px solid #ddd;
+                text-align:center;
+            }
+            th{
+                background:#2563eb;
+                color:#fff;
+            }
+            .message{
+                text-align:center;
+                margin-top:15px;
+                font-weight:bold;
+            }
+            .stats{
+                display:flex;
+                justify-content:space-between;
+                margin-bottom:20px;
+            }
+            .card{
+                width:48%;
+                background:#eef2ff;
+                padding:15px;
+                border-radius:10px;
+                text-align:center;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>Duplicate Data Detection System</h1>
+
+            <div class="stats">
+                <div class="card">
+                    <h3>Total Records</h3>
+                    <h2 id="total">0</h2>
+                </div>
+
+                <div class="card">
+                    <h3>Duplicate Attempts</h3>
+                    <h2 id="duplicates">0</h2>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="name" placeholder="Enter Name">
+                <input type="email" id="email" placeholder="Enter Email">
+                <input type="text" id="phone" placeholder="Enter Phone">
+                <button onclick="addRecord()">Add</button>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Search Records..." onkeyup="searchRecord()">
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+
+            <div class="message" id="message"></div>
+        </div>
+
+        <script>
+            let records = JSON.parse(localStorage.getItem("records")) || [];
+            let duplicateCount = Number(localStorage.getItem("duplicateCount")) || 0;
+
+            function updateStats() {
+                document.getElementById("total").textContent = records.length;
+                document.getElementById("duplicates").textContent = duplicateCount;
+            }
+
+            function displayRecords(data = records) {
+                const table = document.getElementById("tableBody");
+                table.innerHTML = "";
+
+                data.forEach(record => {
+                    table.innerHTML += `
+                    <tr>
+                        <td>${record.name}</td>
+                        <td>${record.email}</td>
+                        <td>${record.phone}</td>
+                    </tr>
+                `;
+                });
+
+                updateStats();
+            }
+
+            function addRecord() {
+                const name = document.getElementById("name").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const phone = document.getElementById("phone").value.trim();
+                const message = document.getElementById("message");
+
+                if (name === "" || email === "" || phone === "") {
+                    message.style.color = "red";
+                    message.textContent = "Please fill all fields.";
+                    return;
+                }
+
+                const duplicate = records.find(
+                        r => r.email === email || r.phone === phone
+                );
+
+                if (duplicate) {
+                    duplicateCount++;
+                    localStorage.setItem("duplicateCount", duplicateCount);
+                    message.style.color = "red";
+                    message.textContent = "Duplicate record detected!";
+                    updateStats();
+                    return;
+                }
+
+                records.push({name, email, phone});
+                localStorage.setItem("records", JSON.stringify(records));
+
+                message.style.color = "green";
+                message.textContent = "Record added successfully.";
+
+                document.getElementById("name").value = "";
+                document.getElementById("email").value = "";
+                document.getElementById("phone").value = "";
+
+                displayRecords();
+            }
+
+            function searchRecord() {
+                const value = document.getElementById("search").value.toLowerCase();
+
+                const filtered = records.filter(r =>
+                    r.name.toLowerCase().includes(value) ||
+                            r.email.toLowerCase().includes(value) ||
+                            r.phone.includes(value)
+                );
+
+                displayRecords(filtered);
+            }
+
+            displayRecords();
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>AI Resume Analyzer</title>
+        <style>
+            body{
+                font-family:Arial,sans-serif;
+                background:#f4f6f9;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                min-height:100vh;
+                margin:0;
+            }
+            .container{
+                width:700px;
+                background:#fff;
+                padding:30px;
+                border-radius:15px;
+                box-shadow:0 0 15px rgba(0,0,0,0.1);
+            }
+            h1{
+                text-align:center;
+                margin-bottom:20px;
+            }
+            input,button{
+                width:100%;
+                padding:12px;
+                margin-top:10px;
+            }
+            button{
+                background:#2563eb;
+                color:white;
+                border:none;
+                border-radius:8px;
+                cursor:pointer;
+            }
+            .result{
+                margin-top:25px;
+                padding:15px;
+                background:#f8fafc;
+                border-radius:10px;
+            }
+            ul{
+                padding-left:20px;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>AI Resume Analyzer</h1>
+
+            <input type="file" id="resumeFile" accept=".txt">
+            <button onclick="analyzeResume()">Analyze Resume</button>
+
+            <div class="result" id="result" style="display:none;">
+                <h3>Resume Score: <span id="score"></span>/100</h3>
+
+                <h3>Detected Skills</h3>
+                <ul id="skills"></ul>
+
+                <h3>Suggested Skills</h3>
+                <ul id="missingSkills"></ul>
+            </div>
+        </div>
+
+        <script>
+            const skillSet = [
+                "html",
+                "css",
+                "javascript",
+                "python",
+                "java",
+                "sql",
+                "flask",
+                "react",
+                "git",
+                "c++",
+                "machine learning",
+                "data analysis"
+            ];
+
+            function analyzeResume() {
+                const file = document.getElementById("resumeFile").files[0];
+
+                if (!file) {
+                    alert("Please upload a resume file.");
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const text = e.target.result.toLowerCase();
+
+                    let foundSkills = [];
+                    let missingSkills = [];
+
+                    skillSet.forEach(skill => {
+                        if (text.includes(skill)) {
+                            foundSkills.push(skill);
+                        } else {
+                            missingSkills.push(skill);
+                        }
+                    });
+
+                    const score = Math.round(
+                            (foundSkills.length / skillSet.length) * 100
+                            );
+
+                    document.getElementById("score").textContent = score;
+
+                    const skillsList = document.getElementById("skills");
+                    skillsList.innerHTML = "";
+
+                    foundSkills.forEach(skill => {
+                        skillsList.innerHTML += `<li>${skill}</li>`;
+                    });
+
+                    const missingList =
+                            document.getElementById("missingSkills");
+
+                    missingList.innerHTML = "";
+
+                    missingSkills.forEach(skill => {
+                        missingList.innerHTML += `<li>${skill}</li>`;
+                    });
+
+                    document.getElementById("result").style.display =
+                            "block";
+                };
+
+                reader.readAsText(file);
+            }
+        </script>
+
+    </body>
+</html>

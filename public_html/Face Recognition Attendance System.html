@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Face Recognition Attendance System</title>
+        <style>
+            body{
+                font-family:Arial,sans-serif;
+                background:#f4f6f9;
+                padding:20px;
+            }
+            .container{
+                max-width:1000px;
+                margin:auto;
+                background:#fff;
+                padding:30px;
+                border-radius:15px;
+                box-shadow:0 0 15px rgba(0,0,0,0.1);
+            }
+            h1,h2{
+                text-align:center;
+            }
+            .center{
+                text-align:center;
+            }
+            video{
+                width:320px;
+                border:2px solid #ddd;
+                border-radius:10px;
+            }
+            canvas{
+                display:none;
+            }
+            input{
+                padding:12px;
+                width:300px;
+                margin:10px;
+            }
+            button{
+                padding:10px 20px;
+                margin:5px;
+                background:#2563eb;
+                color:#fff;
+                border:none;
+                border-radius:8px;
+                cursor:pointer;
+            }
+            table{
+                width:100%;
+                border-collapse:collapse;
+                margin-top:20px;
+            }
+            th,td{
+                border:1px solid #ddd;
+                padding:12px;
+                text-align:center;
+            }
+            th{
+                background:#2563eb;
+                color:#fff;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+
+            <h1>Face Recognition Attendance System</h1>
+
+            <div class="center">
+                <input type="text"
+                       id="studentName"
+                       placeholder="Enter Student Name">
+
+                <br>
+
+                <video id="video" autoplay></video>
+                <canvas id="canvas"></canvas>
+
+                <br>
+
+                <button onclick="registerStudent()">
+                    Register Student
+                </button>
+
+                <button onclick="markAttendance()">
+                    Mark Attendance
+                </button>
+            </div>
+
+            <h2>Registered Students</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTable"></tbody>
+            </table>
+
+            <h2>Attendance Records</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTable"></tbody>
+            </table>
+
+        </div>
+
+        <script>
+            const video =
+                    document.getElementById("video");
+
+            navigator.mediaDevices
+                    .getUserMedia({video: true})
+                    .then(stream => {
+                        video.srcObject = stream;
+                    })
+                    .catch(() => {
+                        alert("Camera access denied.");
+                    });
+
+            let students =
+                    JSON.parse(localStorage.getItem("students"))
+                    || [];
+
+            let attendance =
+                    JSON.parse(localStorage.getItem("attendance"))
+                    || [];
+
+            function registerStudent() {
+
+                const name =
+                        document.getElementById("studentName")
+                        .value.trim();
+
+                if (name === "") {
+                    alert("Enter student name.");
+                    return;
+                }
+
+                const exists =
+                        students.find(
+                                s =>
+                            s.name.toLowerCase() ===
+                                    name.toLowerCase()
+                        );
+
+                if (exists) {
+                    alert("Student already exists.");
+                    return;
+                }
+
+                const canvas =
+                        document.getElementById("canvas");
+
+                const ctx =
+                        canvas.getContext("2d");
+
+                canvas.width =
+                        video.videoWidth;
+
+                canvas.height =
+                        video.videoHeight;
+
+                ctx.drawImage(
+                        video,
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                        );
+
+                const image =
+                        canvas.toDataURL("image/png");
+
+                students.push({
+                    name: name,
+                    photo: image
+                });
+
+                localStorage.setItem(
+                        "students",
+                        JSON.stringify(students)
+                        );
+
+                document.getElementById(
+                        "studentName"
+                        ).value = "";
+
+                displayStudents();
+
+                alert("Student registered.");
+            }
+
+            function displayStudents() {
+
+                const table =
+                        document.getElementById(
+                                "studentTable"
+                                );
+
+                table.innerHTML = "";
+
+                students.forEach(
+                        (student, index) => {
+                    table.innerHTML += `
+                <tr>
+                    <td>${student.name}</td>
+                    <td>
+                        <button
+                        onclick="deleteStudent(${index})">
+                        Delete
+                        </button>
+                    </td>
+                </tr>
+                `;
+                });
+            }
+
+            function deleteStudent(index) {
+
+                if (confirm(
+                        "Delete this student?"
+                        )) {
+                    students.splice(index, 1);
+
+                    localStorage.setItem(
+                            "students",
+                            JSON.stringify(students)
+                            );
+
+                    displayStudents();
+                }
+            }
+
+            function markAttendance() {
+
+                const name =
+                        prompt(
+                                "Enter registered student name:"
+                                );
+
+                if (!name) {
+                    return;
+                }
+
+                const student =
+                        students.find(
+                                s =>
+                            s.name.toLowerCase() ===
+                                    name.toLowerCase()
+                        );
+
+                if (!student) {
+                    alert("Student not found.");
+                    return;
+                }
+
+                const now =
+                        new Date();
+
+                attendance.push({
+                    name: student.name,
+                    date:
+                            now.toLocaleDateString(),
+                    time:
+                            now.toLocaleTimeString()
+                });
+
+                localStorage.setItem(
+                        "attendance",
+                        JSON.stringify(attendance)
+                        );
+
+                displayAttendance();
+
+                alert(
+                        "Attendance marked."
+                        );
+            }
+
+            function displayAttendance() {
+
+                const table =
+                        document.getElementById(
+                                "attendanceTable"
+                                );
+
+                table.innerHTML = "";
+
+                attendance.forEach(
+                        (record, index) => {
+                    table.innerHTML += `
+                <tr>
+                    <td>${record.name}</td>
+                    <td>${record.date}</td>
+                    <td>${record.time}</td>
+                    <td>
+                        <button
+                        onclick="deleteAttendance(${index})">
+                        Delete
+                        </button>
+                    </td>
+                </tr>
+                `;
+                });
+            }
+
+            function deleteAttendance(index) {
+
+                if (confirm(
+                        "Delete this attendance record?"
+                        )) {
+                    attendance.splice(index, 1);
+
+                    localStorage.setItem(
+                            "attendance",
+                            JSON.stringify(attendance)
+                            );
+
+                    displayAttendance();
+                }
+            }
+
+            displayStudents();
+            displayAttendance();
+        </script>
+
+    </body>
+</html>

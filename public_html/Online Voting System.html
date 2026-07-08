@@ -1,0 +1,159 @@
+]<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Online Voting System</title>
+        <style>
+            body{
+                font-family:Arial,sans-serif;
+                background:#f4f6f9;
+                margin:0;
+                padding:30px;
+            }
+            .container{
+                max-width:800px;
+                margin:auto;
+                background:#fff;
+                padding:30px;
+                border-radius:15px;
+                box-shadow:0 0 15px rgba(0,0,0,0.1);
+            }
+            h1{
+                text-align:center;
+            }
+            .candidate{
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                background:#f8fafc;
+                padding:15px;
+                border-radius:10px;
+                margin-top:15px;
+            }
+            button{
+                padding:10px 20px;
+                background:#2563eb;
+                color:#fff;
+                border:none;
+                border-radius:8px;
+                cursor:pointer;
+            }
+            .bar{
+                height:25px;
+                background:#2563eb;
+                color:white;
+                text-align:center;
+                line-height:25px;
+                border-radius:5px;
+                margin-top:8px;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>Online Voting System</h1>
+
+            <div id="candidates"></div>
+
+            <h2>Live Results</h2>
+            <div id="results"></div>
+
+            <button onclick="resetVotes()">
+                Reset Election
+            </button>
+        </div>
+
+        <script>
+            let candidates =
+                    JSON.parse(localStorage.getItem("votes"))
+                    || [
+                        {name: "Candidate A", votes: 0},
+                        {name: "Candidate B", votes: 0},
+                        {name: "Candidate C", votes: 0}
+                    ];
+
+            function displayCandidates() {
+                const container =
+                        document.getElementById("candidates");
+
+                container.innerHTML = "";
+
+                candidates.forEach((candidate, index) => {
+                    container.innerHTML += `
+                <div class="candidate">
+                    <h3>${candidate.name}</h3>
+                    <button onclick="vote(${index})">
+                        Vote
+                    </button>
+                </div>
+                `;
+                });
+
+                displayResults();
+            }
+
+            function vote(index) {
+                if (localStorage.getItem("hasVoted")) {
+                    alert("You have already voted.");
+                    return;
+                }
+
+                candidates[index].votes++;
+
+                localStorage.setItem(
+                        "votes",
+                        JSON.stringify(candidates)
+                        );
+
+                localStorage.setItem(
+                        "hasVoted",
+                        "true"
+                        );
+
+                displayCandidates();
+            }
+
+            function displayResults() {
+                const results =
+                        document.getElementById("results");
+
+                results.innerHTML = "";
+
+                const total =
+                        candidates.reduce(
+                                (sum, c) => sum + c.votes,
+                                0
+                                );
+
+                candidates.forEach(candidate => {
+                    const percent =
+                            total === 0
+                            ? 0
+                            : ((candidate.votes / total) * 100)
+                            .toFixed(1);
+
+                    results.innerHTML += `
+                <h4>${candidate.name}
+                (${candidate.votes} votes)</h4>
+
+                <div class="bar"
+                     style="width:${percent}%">
+                     ${percent}%
+                </div>
+                `;
+                });
+            }
+
+            function resetVotes() {
+                localStorage.removeItem("votes");
+                localStorage.removeItem("hasVoted");
+                location.reload();
+            }
+
+            displayCandidates();
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Movie Recommendation System</title>
+        <style>
+            body{
+                font-family:Arial,sans-serif;
+                background:#111827;
+                color:white;
+                margin:0;
+                padding:30px;
+            }
+            .container{
+                max-width:1000px;
+                margin:auto;
+                text-align:center;
+            }
+            select,button{
+                padding:12px;
+                margin:10px;
+                border:none;
+                border-radius:8px;
+            }
+            button{
+                background:#2563eb;
+                color:white;
+                cursor:pointer;
+            }
+            .movies{
+                display:grid;
+                grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+                gap:20px;
+                margin-top:30px;
+            }
+            .card{
+                background:#1f2937;
+                border-radius:15px;
+                padding:15px;
+            }
+            .card img{
+                width:100%;
+                height:300px;
+                object-fit:cover;
+                border-radius:10px;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>Movie Recommendation System</h1>
+
+            <select id="genre">
+                <option value="action">Action</option>
+                <option value="comedy">Comedy</option>
+                <option value="sci-fi">Sci-Fi</option>
+                <option value="horror">Horror</option>
+            </select>
+
+            <button onclick="showMovies()">
+                Recommend Movies
+            </button>
+
+            <div class="movies" id="movies"></div>
+        </div>
+
+        <script>
+            const movieData = {
+                action: [
+                    {
+                        name: "John Wick",
+                        image: "https://picsum.photos/300/400?random=1",
+                        rating: "8.5/10"
+                    },
+                    {
+                        name: "Mad Max",
+                        image: "https://picsum.photos/300/400?random=2",
+                        rating: "8.1/10"
+                    }
+                ],
+                comedy: [
+                    {
+                        name: "The Mask",
+                        image: "https://picsum.photos/300/400?random=3",
+                        rating: "7.9/10"
+                    },
+                    {
+                        name: "Free Guy",
+                        image: "https://picsum.photos/300/400?random=4",
+                        rating: "7.5/10"
+                    }
+                ],
+                "sci-fi": [
+                    {
+                        name: "Interstellar",
+                        image: "https://picsum.photos/300/400?random=5",
+                        rating: "8.7/10"
+                    },
+                    {
+                        name: "The Martian",
+                        image: "https://picsum.photos/300/400?random=6",
+                        rating: "8.0/10"
+                    }
+                ],
+                horror: [
+                    {
+                        name: "The Conjuring",
+                        image: "https://picsum.photos/300/400?random=7",
+                        rating: "7.5/10"
+                    },
+                    {
+                        name: "Insidious",
+                        image: "https://picsum.photos/300/400?random=8",
+                        rating: "6.8/10"
+                    }
+                ]
+            };
+
+            function showMovies() {
+                const genre =
+                        document.getElementById("genre").value;
+
+                const container =
+                        document.getElementById("movies");
+
+                container.innerHTML = "";
+
+                movieData[genre].forEach(movie => {
+                    container.innerHTML += `
+                <div class="card">
+                    <img src="${movie.image}">
+                    <h3>${movie.name}</h3>
+                    <p>⭐ ${movie.rating}</p>
+                </div>
+                `;
+                });
+            }
+        </script>
+
+    </body>
+</html>

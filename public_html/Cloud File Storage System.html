@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cloud File Storage System</title>
+        <style>
+            body{
+                font-family:Arial,sans-serif;
+                background:#f4f7fc;
+                margin:0;
+                padding:30px;
+            }
+            .container{
+                max-width:900px;
+                margin:auto;
+                background:#fff;
+                padding:30px;
+                border-radius:15px;
+                box-shadow:0 0 15px rgba(0,0,0,0.1);
+            }
+            h1{
+                text-align:center;
+            }
+            input,button{
+                padding:12px;
+                margin:10px 0;
+            }
+            button{
+                background:#2563eb;
+                color:#fff;
+                border:none;
+                border-radius:6px;
+                cursor:pointer;
+            }
+            table{
+                width:100%;
+                border-collapse:collapse;
+                margin-top:20px;
+            }
+            th,td{
+                border:1px solid #ddd;
+                padding:12px;
+                text-align:center;
+            }
+            th{
+                background:#2563eb;
+                color:#fff;
+            }
+            a{
+                text-decoration:none;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>Cloud File Storage System</h1>
+
+            <input type="file" id="fileInput">
+            <button onclick="uploadFile()">Upload File</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Type</th>
+                        <th>Size</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="fileTable"></tbody>
+            </table>
+        </div>
+
+        <script>
+            let files =
+                    JSON.parse(localStorage.getItem("cloudFiles"))
+                    || [];
+
+            function displayFiles() {
+                const table =
+                        document.getElementById("fileTable");
+
+                table.innerHTML = "";
+
+                files.forEach((file, index) => {
+                    table.innerHTML += `
+                <tr>
+                    <td>${file.name}</td>
+                    <td>${file.type}</td>
+                    <td>${file.size}</td>
+                    <td>
+                        <a href="${file.data}"
+                           download="${file.name}">
+                           Download
+                        </a>
+                        |
+                        <button onclick="deleteFile(${index})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+                `;
+                });
+            }
+
+            function uploadFile() {
+                const input =
+                        document.getElementById("fileInput");
+
+                const file = input.files[0];
+
+                if (!file) {
+                    alert("Select a file.");
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    files.push({
+                        name: file.name,
+                        type: file.type || "Unknown",
+                        size:
+                                (file.size / 1024)
+                                .toFixed(2) + " KB",
+                        data: e.target.result
+                    });
+
+                    localStorage.setItem(
+                            "cloudFiles",
+                            JSON.stringify(files)
+                            );
+
+                    displayFiles();
+                    input.value = "";
+                };
+
+                reader.readAsDataURL(file);
+            }
+
+            function deleteFile(index) {
+                files.splice(index, 1);
+
+                localStorage.setItem(
+                        "cloudFiles",
+                        JSON.stringify(files)
+                        );
+
+                displayFiles();
+            }
+
+            displayFiles();
+        </script>
+
+    </body>
+</html>

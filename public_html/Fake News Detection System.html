@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Fake News Detection System</title>
+        <style>
+            body{
+                font-family:Arial,sans-serif;
+                background:#f4f6f9;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                min-height:100vh;
+                margin:0;
+            }
+            .container{
+                width:750px;
+                background:#fff;
+                padding:30px;
+                border-radius:15px;
+                box-shadow:0 0 15px rgba(0,0,0,0.1);
+            }
+            h1{
+                text-align:center;
+            }
+            textarea{
+                width:100%;
+                height:220px;
+                padding:12px;
+                margin-top:15px;
+                resize:none;
+            }
+            button{
+                width:100%;
+                padding:12px;
+                margin-top:15px;
+                background:#2563eb;
+                color:white;
+                border:none;
+                border-radius:8px;
+                cursor:pointer;
+            }
+            .result{
+                margin-top:20px;
+                padding:15px;
+                border-radius:10px;
+                background:#f8fafc;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>Fake News Detection System</h1>
+
+            <textarea id="newsText"
+                      placeholder="Paste the news article here..."></textarea>
+
+            <button onclick="checkNews()">Analyze News</button>
+
+            <div class="result" id="result" style="display:none;">
+                <h3 id="prediction"></h3>
+                <h3 id="confidence"></h3>
+                <h4>Suspicious Keywords Found:</h4>
+                <ul id="keywords"></ul>
+            </div>
+        </div>
+
+        <script>
+            const fakeWords = [
+                "shocking",
+                "secret",
+                "guaranteed",
+                "miracle",
+                "breaking",
+                "click here",
+                "100%",
+                "viral",
+                "unbelievable",
+                "exclusive"
+            ];
+
+            function checkNews() {
+                const text =
+                        document.getElementById("newsText")
+                        .value.toLowerCase().trim();
+
+                if (text === "") {
+                    alert("Please enter news text.");
+                    return;
+                }
+
+                let found = [];
+
+                fakeWords.forEach(word => {
+                    if (text.includes(word)) {
+                        found.push(word);
+                    }
+                });
+
+                const percentage =
+                        Math.min(found.length * 15, 100);
+
+                const prediction =
+                        percentage >= 50
+                        ? "⚠️ Potentially Fake News"
+                        : "✅ Likely Genuine News";
+
+                document.getElementById("prediction")
+                        .textContent = prediction;
+
+                document.getElementById("confidence")
+                        .textContent =
+                        "Suspicion Score: " + percentage + "%";
+
+                const list =
+                        document.getElementById("keywords");
+
+                list.innerHTML = "";
+
+                if (found.length === 0) {
+                    list.innerHTML =
+                            "<li>No suspicious keywords detected.</li>";
+                } else {
+                    found.forEach(word => {
+                        list.innerHTML +=
+                                `<li>${word}</li>`;
+                    });
+                }
+
+                document.getElementById("result")
+                        .style.display = "block";
+            }
+        </script>
+
+    </body>
+</html>
